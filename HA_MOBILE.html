@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H.A BICICLETAS MOBILE - Acceso</title>
+    <!-- Tailwind CSS CDN para un estilo moderno y responsive -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilos personalizados para los botones del encabezado en la interfaz de cliente */
+        .header-card {
+            @apply flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1;
+        }
+        /* Estilo para los botones de selección de rol */
+        .role-card {
+            @apply flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-xl cursor-pointer hover:bg-gray-50 transition-all duration-300;
+        }
+        /* Estilos para el contenedor del login */
+        .login-container {
+            @apply flex flex-col items-center justify-center min-h-screen p-4 font-sans;
+        }
+        /* Estilos para la barra de progreso dorada */
+        .golden-progress-bar-container {
+            @apply w-full bg-gray-200 rounded-full h-8 relative overflow-hidden;
+        }
+        .golden-progress-bar-fill {
+            @apply h-full rounded-full text-center text-white flex items-center justify-center transition-all duration-500 ease-out;
+            background-image: linear-gradient(to right, #FFD700, #DAA520); /* Golden gradient */
+            min-width: 0%; /* Ensure it starts from 0 */
+        }
+        /* Estilo para la medalla */
+        .golden-medal {
+            /* Position relative to the parent .p-6.bg-white.rounded-xl.shadow-md */
+            @apply absolute right-0 top-1/2 transform -translate-y-1/2 w-12 h-12 flex items-center justify-center rounded-full shadow-lg cursor-pointer transition-all duration-300;
+            background-image: linear-gradient(to bottom right, #FFD700, #DAA520); /* Golden gradient */
+            font-weight: bold;
+            color: #8B4513; /* SaddleBrown for contrast */
+            border: 2px solid #B8860B; /* DarkGoldenrod border */
+            font-size: 0.875rem; /* text-sm */
+            /* Adjusted to be slightly outside the container, but aligned with the bar */
+            right: -0.5rem; /* Adjust as needed for visual spacing */
+        }
+        .golden-medal.hidden {
+            display: none;
+        }
+        /* Estilo para el mensaje de descuento */
+        .discount-message-box {
+            @apply fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4;
+        }
+        .discount-message-content {
+            @apply bg-white p-8 rounded-lg shadow-2xl text-center max-w-md mx-auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <!-- Logo en la esquina superior izquierda de toda la aplicación -->
+    <div class="absolute top-4 left-4 z-20">
+        <img src="uploaded:LOGOHA.png-ef429b84-832c-42f9-ab3e-40e1c42556a7" alt="Logo de H.A Bicicletas" class="w-40 h-auto">
+    </div>
+
+    <!-- Contenedor principal de la aplicación -->
+    <div class="flex items-center justify-center min-h-screen p-4">
+
+        <!-- Interfaz de Login (visible por defecto) -->
+        <div id="login-container" class="w-full max-w-lg space-y-8">
+            <div class="text-center">
+                <h1 class="text-4xl font-extrabold text-gray-800">Bienvenido a H.A Bicicletas</h1>
+                <p class="mt-2 text-lg text-gray-600">Por favor, selecciona tu tipo de acceso.</p>
+            </div>
+            
+            <!-- Botones de selección de rol -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <button id="client-role-btn" class="role-card">
+                    <span class="text-3xl mb-2">👤</span>
+                    <span class="text-xl font-bold text-gray-800">Soy Cliente</span>
+                </button>
+                <button id="admin-role-btn" class="role-card">
+                    <span class="text-3xl mb-2">⚙️</span>
+                    <span class="text-xl font-bold text-gray-800">Soy Administrador</span>
+                </button>
+            </div>
+            
+            <!-- Formulario de Login de Cliente (oculto por defecto) -->
+            <div id="client-login-form" class="bg-white p-8 rounded-lg shadow-2xl space-y-6 hidden">
+                <h2 class="text-2xl font-bold text-gray-800 text-center">Acceso de Cliente</h2>
+                <form id="client-login" class="space-y-4">
+                    <div>
+                        <label for="client-email" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+                        <input type="email" id="client-email" name="client-email" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                    </div>
+                    <div>
+                        <label for="client-password" class="block text-sm font-medium text-gray-700">Contraseña (NIT/CC)</label>
+                        <input type="password" id="client-password" name="client-password" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                    </div>
+                    <div id="client-error-message" class="text-red-500 text-sm hidden"></div>
+                    <button type="submit"
+                        class="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300">
+                        Iniciar Sesión
+                    </button>
+                    <button type="button" id="back-to-roles-btn" class="w-full py-2 text-gray-500 font-semibold hover:text-gray-700">
+                        Volver
+                    </button>
+                </form>
+            </div>
+
+            <!-- Formulario de Login de Administrador (oculto por defecto) -->
+            <div id="admin-login-form" class="bg-white p-8 rounded-lg shadow-2xl space-y-6 hidden">
+                <h2 class="text-2xl font-bold text-gray-800 text-center">Acceso de Administrador</h2>
+                <form id="admin-login" class="space-y-4">
+                    <div>
+                        <label for="admin-username" class="block text-sm font-medium text-gray-700">Usuario</label>
+                        <input type="text" id="admin-username" name="admin-username" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                    </div>
+                    <div>
+                        <label for="admin-password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+                        <input type="password" id="admin-password" name="admin-password" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                    </div>
+                    <div id="admin-error-message" class="text-red-500 text-sm hidden"></div>
+                    <button type="submit"
+                        class="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300">
+                        Iniciar Sesión
+                    </button>
+                    <button type="button" id="back-to-roles-btn2" class="w-full py-2 text-gray-500 font-semibold hover:text-gray-700">
+                        Volver
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Interfaz del Cliente (oculta por defecto) -->
+        <div id="client-view" class="hidden w-full max-w-5xl space-y-8">
+            <div class="bg-white p-8 rounded-lg shadow-2xl w-full space-y-8">
+                <!-- Botón de Cerrar Sesión para Cliente -->
+                <div class="flex justify-end">
+                    <button id="logout-client-btn" class="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 transition duration-300">
+                        Cerrar Sesión
+                    </button>
+                </div>
+                <!-- Título de la aplicación para el cliente -->
+                <div class="text-center">
+                    <h1 class="text-4xl font-extrabold text-gray-800">Mi Estado de Pagos</h1>
+                    <p class="mt-2 text-lg text-gray-600">¡Tu progreso en H.A BICICLETAS MOBILE!</p>
+                </div>
+
+                <!-- Fecha Límite de Pago para el Cliente -->
+                <div class="p-6 bg-red-100 rounded-xl shadow-inner text-center">
+                    <h2 class="text-2xl font-bold text-red-800 mb-2">Fecha Límite de Pago:</h2>
+                    <p id="client-payment-deadline-display" class="text-4xl font-extrabold text-red-700"></p>
+                </div>
+
+                <!-- Encabezado con botones de navegación como cuadros bonitos -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <button id="show-payment-history-btn" class="header-card">
+                        <span class="text-lg font-bold text-gray-800">Historial de Pagos</span>
+                        <span class="text-sm text-gray-500">Ver tus movimientos</span>
+                    </button>
+                    <button class="header-card">
+                        <span class="text-lg font-bold text-gray-800">Documentos</span>
+                        <span class="text-sm text-gray-500">Acuerdo de Pago</span>
+                    </button>
+                    <a href="https://www.avalpaycenter.com/wps/portal/portal-de-pagos/web/pagos-aval/resultado-busqueda/realizar-pago-facturadores?idConv=00003076&origen=buscar" 
+                       target="_blank" 
+                       class="header-card">
+                        <span class="text-lg font-bold text-blue-600">Pagar</span>
+                        <span class="text-sm text-blue-400">Paga tu cuota ahora</span>
+                    </a>
+                </div>
+
+                <!-- Sección principal del cliente -->
+                <div id="client-main-info" class="p-6 bg-blue-50 rounded-xl shadow-inner">
+                    <h2 class="text-2xl font-bold text-blue-800 mb-4">Información del Cliente</h2>
+                    <div id="client-status-container" class="space-y-4">
+                        <!-- La información del cliente se renderizará aquí -->
+                    </div>
+                    <div class="mt-8 text-center">
+                        <p class="text-gray-600 italic">¡Sigue así, estás a un paso más cerca de tu meta!</p>
+                    </div>
+                </div>
+
+                <!-- Nueva Sección de Progreso de Cumplimiento para el Cliente -->
+                <div class="p-6 bg-white rounded-xl shadow-md relative"> <!-- Added relative here -->
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Progreso de Cumplimiento</h2>
+                    <div class="golden-progress-bar-container">
+                        <div id="client-progress-bar-fill" class="golden-progress-bar-fill" style="width: 0%;">
+                            <span id="client-progress-percentage">0%</span>
+                        </div>
+                    </div>
+                    <div id="golden-medal" class="golden-medal hidden">
+                        5%
+                    </div>
+                    <div id="discount-message-area" class="mt-4 text-center hidden">
+                        <p class="text-xl font-bold text-green-700">GANA UN 5% DE DESCUENTO EN TUS PRÓXIMAS COMPRAS, SI CUMPLES AL 100% EL ACUERDO</p>
+                    </div>
+                </div>
+
+                <!-- Sección de Historial de Pagos del Cliente (oculta por defecto) -->
+                <div id="payment-history-section" class="p-6 bg-white rounded-xl shadow-md hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Tu Historial de Pagos</h2>
+                    <div id="payment-history-list" class="space-y-2">
+                        <!-- Los pagos del cliente se renderizarán aquí -->
+                        <p class="text-gray-500 italic">No hay pagos registrados aún.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interfaz del Administrador (oculta por defecto) -->
+        <div id="admin-view" class="hidden w-full max-w-5xl space-y-8">
+            <div class="bg-white p-8 rounded-lg shadow-2xl w-full space-y-8">
+                <!-- Botón de Cerrar Sesión para Administrador -->
+                <div class="flex justify-end">
+                    <button id="logout-admin-btn" class="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 transition duration-300">
+                        Cerrar Sesión
+                    </button>
+                </div>
+                <!-- Título de la aplicación -->
+                <div class="text-center">
+                    <h1 class="text-4xl font-extrabold text-gray-800">Gestor de Acuerdos - H.A BICICLETAS MOBILE</h1>
+                    <p class="mt-2 text-lg text-gray-600">Tu solución inteligente para una cartera sostenible</p>
+                </div>
+
+                <!-- Fecha Límite de Pago -->
+                <div class="p-6 bg-red-100 rounded-xl shadow-inner text-center">
+                    <h2 class="text-2xl font-bold text-red-800 mb-2">Fecha Límite de Pago:</h2>
+                    <p id="payment-deadline-display" class="text-4xl font-extrabold text-red-700"></p>
+                </div>
+
+                <!-- Formulario para agregar un nuevo cliente -->
+                <div class="p-6 bg-blue-50 rounded-xl shadow-inner">
+                    <h2 class="text-2xl font-bold text-blue-800 mb-4">Agregar Nuevo Cliente</h2>
+                    <form id="client-form" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                            <!-- Campo para NIT/CC -->
+                            <div>
+                                <label for="client-nitcc" class="block text-sm font-medium text-gray-700">NIT/CC</label>
+                                <input type="text" id="client-nitcc" name="client-nitcc" required
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                            </div>
+                            <!-- Campo para el nombre -->
+                            <div>
+                                <label for="client-name" class="block text-sm font-medium text-gray-700">Nombre del Cliente</label>
+                                <input type="text" id="client-name" name="client-name" required
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                            </div>
+                            <!-- Campo para el correo electrónico -->
+                            <div>
+                                <label for="client-email" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+                                <input type="email" id="client-email" name="client-email" required
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                            </div>
+                            <!-- Campo para el valor de la cuota -->
+                            <div>
+                                <label for="client-quota-value" class="block text-sm font-medium text-gray-700">Valor Cuota</label>
+                                <input type="number" id="client-quota-value" name="client-quota-value" required
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                            </div>
+                            <!-- Campo para el capital de saldo -->
+                            <div>
+                                <label for="client-balance" class="block text-sm font-medium text-gray-700">Capital Saldo</label>
+                                <input type="number" id="client-balance" name="client-balance" required
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                            </div>
+                        </div>
+                        <!-- Botón para agregar cliente -->
+                        <div class="flex justify-end">
+                            <button type="submit"
+                                class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300">
+                                Agregar Cliente
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Sección para cargar clientes desde CSV -->
+                <div class="p-6 bg-purple-50 rounded-xl shadow-inner">
+                    <h2 class="text-2xl font-bold text-purple-800 mb-4">Cargar Clientes desde CSV</h2>
+                    <div class="flex items-center space-x-4 mb-4">
+                        <input type="file" id="csv-upload-input" accept=".csv" class="block w-full text-sm text-gray-500
+                            file:mr-4 file:py-2 file:px-4
+                            file:rounded-full file:border-0
+                            file:text-sm file:font-semibold
+                            file:bg-purple-50 file:text-purple-700
+                            hover:file:bg-purple-100 cursor-pointer">
+                        <button id="upload-csv-btn"
+                            class="px-6 py-2 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 transition duration-300">
+                            Cargar CSV
+                        </button>
+                    </div>
+                    <div class="flex justify-end">
+                        <button id="download-template-btn"
+                            class="px-6 py-2 bg-gray-400 text-white font-semibold rounded-lg shadow-md hover:bg-gray-500 transition duration-300">
+                            Descargar Plantilla Clientes
+                        </button>
+                    </div>
+                    <div id="csv-upload-message" class="mt-4 text-sm hidden"></div>
+                </div>
+
+                <!-- Nueva Sección para cargar pagos desde CSV -->
+                <div class="p-6 bg-green-50 rounded-xl shadow-inner">
+                    <h2 class="text-2xl font-bold text-green-800 mb-4">Cargar Pagos desde CSV</h2>
+                    <div class="flex items-center space-x-4 mb-4">
+                        <input type="file" id="csv-payments-upload-input" accept=".csv" class="block w-full text-sm text-gray-500
+                            file:mr-4 file:py-2 file:px-4
+                            file:rounded-full file:border-0
+                            file:text-sm file:font-semibold
+                            file:bg-green-50 file:text-green-700
+                            hover:file:bg-green-100 cursor-pointer">
+                        <button id="upload-payments-csv-btn"
+                            class="px-6 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-300">
+                            Cargar Pagos
+                        </button>
+                    </div>
+                    <div class="flex justify-end">
+                        <button id="download-payments-template-btn"
+                            class="px-6 py-2 bg-gray-400 text-white font-semibold rounded-lg shadow-md hover:bg-gray-500 transition duration-300">
+                            Descargar Plantilla Pagos
+                        </button>
+                    </div>
+                    <div id="payments-csv-upload-message" class="mt-4 text-sm hidden"></div>
+                </div>
+
+                <!-- Nueva Sección para agregar un pago manualmente -->
+                <div class="p-6 bg-yellow-50 rounded-xl shadow-inner">
+                    <h2 class="text-2xl font-bold text-yellow-800 mb-4">Agregar Nuevo Pago Manual</h2>
+                    <form id="manual-payment-form" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div>
+                                <label for="payment-nitcc" class="block text-sm font-medium text-gray-700">NIT/CC del Cliente</label>
+                                <input type="text" id="payment-nitcc" name="payment-nitcc" required
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500 p-2 border">
+                            </div>
+                            <div>
+                                <label for="payment-value" class="block text-sm font-medium text-gray-700">Valor</label>
+                                <input type="number" id="payment-value" name="payment-value" required
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500 p-2 border">
+                            </div>
+                            <div>
+                                <label for="payment-date" class="block text-sm font-medium text-gray-700">Fecha de Pago</label>
+                                <input type="date" id="payment-date" name="payment-date" required
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500 p-2 border">
+                            </div>
+                            <div>
+                                <label for="payment-bank" class="block text-sm font-medium text-gray-700">Banco</label>
+                                <input type="text" id="payment-bank" name="payment-bank" required
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500 p-2 border">
+                            </div>
+                            <div>
+                                <label for="payment-reference" class="block text-sm font-medium text-gray-700">Referencia</label>
+                                <input type="text" id="payment-reference" name="payment-reference" required
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500 p-2 border">
+                            </div>
+                        </div>
+                        <div id="manual-payment-message" class="mt-4 text-sm hidden"></div>
+                        <div class="flex justify-end">
+                            <button type="submit"
+                                class="px-6 py-2 bg-yellow-600 text-white font-semibold rounded-lg shadow-md hover:bg-yellow-700 transition duration-300">
+                                Agregar Pago Manual
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Sección de Historial de Pagos del Administrador -->
+                <div class="p-6 bg-white rounded-xl shadow-md">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Historial de Pagos del Administrador</h2>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <input type="text" id="admin-payment-filter-input" placeholder="Filtrar por NIT/CC, Referencia, Banco, Fecha"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                        <button id="admin-payment-filter-btn"
+                            class="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
+                            Filtrar Pagos
+                        </button>
+                    </div>
+                    <div id="admin-payment-history-list" class="space-y-4">
+                        <!-- Los pagos se renderizarán aquí -->
+                        <p class="text-gray-500 italic">No hay pagos registrados aún en el historial.</p>
+                    </div>
+                </div>
+
+                <!-- Sección de Clientes y Ranking (se mantiene para contexto) -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Área de visualización de clientes -->
+                    <div class="lg:col-span-2 p-6 bg-white rounded-xl shadow-md">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-2xl font-bold text-gray-800">Lista de Clientes</h2>
+                            <!-- Filtro por NIT/CC -->
+                            <div class="flex items-center space-x-2">
+                                <input type="text" id="nitcc-filter-input" placeholder="Filtrar por NIT/CC"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                                <button id="filter-nitcc-btn"
+                                    class="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
+                                    Buscar
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="client-list-container" class="space-y-4">
+                            <!-- Los clientes se renderizarán aquí -->
+                            <div id="no-clients-message" class="text-center text-gray-500 italic p-4">
+                                No hay clientes agregados aún.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Área del Ranking de Usuarios -->
+                    <div class="lg:col-span-1 p-6 bg-white rounded-xl shadow-md">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">Ranking de Cumplimiento</h2>
+                        <div class="bg-green-50 p-4 rounded-xl shadow-inner">
+                            <p class="text-green-700 font-semibold text-center mb-2">¡Motívate con los que cumplen!</p>
+                            <div id="ranking-list" class="space-y-2">
+                                <!-- El ranking se renderizará aquí -->
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-xl">🥇</span>
+                                    <span class="text-sm font-medium text-gray-800">Usuario A</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-xl">🥈</span>
+                                    <span class="text-sm font-medium text-gray-800">Usuario B</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-xl">🥉</span>
+                                    <span class="text-sm font-medium text-gray-800">Usuario C</span>
+                                </div>
+                                <p class="text-xs text-gray-500 italic mt-4 text-center">
+                                    (Nota: Esta es una maqueta. Un ranking real necesitaría una base de datos de usuarios.)
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Área de notificaciones -->
+                <div id="notification-area" class="p-6 bg-red-100 border-l-4 border-red-500 text-red-700 hidden rounded-md" role="alert">
+                    <p class="font-bold">Alertas de Vencimiento:</p>
+                    <ul id="notification-list" class="mt-2 list-disc list-inside"></ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // =========================================================
+        // LÓGICA DE UTILIDAD (Funciones que deben estar disponibles globalmente)
+        // =========================================================
+
+        // Función para formatear números con separadores de miles
+        function formatNumber(num) {
+            return num.toLocaleString('es-CO'); // Formato para Colombia (separador de miles con punto, decimal con coma)
+        }
+
+        // Función para dibujar la llanta de la bicicleta con radios
+        function drawBikeTire(canvas, progress) {
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            const radius = Math.min(width, height) / 2 - 5;
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            ctx.clearRect(0, 0, width, height);
+            
+            // Dibujar la llanta exterior
+            ctx.lineWidth = 10;
+            ctx.strokeStyle = '#333';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            // Dibujar los radios
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#a0a0a0'; // Color gris para los radios
+            const spokeCount = 20; // Número de radios
+            for (let i = 0; i < spokeCount; i++) {
+                const angle = (i / spokeCount) * 2 * Math.PI;
+                const innerRadius = radius * 0.1; // Radio del buje
+                const spokeLength = radius - innerRadius;
+                
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(centerX + spokeLength * Math.cos(angle), centerY + spokeLength * Math.sin(angle));
+                ctx.stroke();
+            }
+
+            // Dibujar el aire (círculo interior)
+            ctx.fillStyle = '#22c55e'; // Verde para el aire
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius * progress, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Dibujar el centro del buje
+            ctx.fillStyle = '#666';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius * 0.15, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Dibujar la válvula (pequeño rectángulo)
+            ctx.fillStyle = '#333';
+            ctx.fillRect(centerX - 2, centerY - radius - 10, 4, 10);
+        }
+
+        // Función para parsear el CSV de CLIENTES
+        function parseClientsCSV(csvText) {
+            const lines = csvText.split('\n').filter(line => line.trim() !== '');
+            if (lines.length === 0) {
+                throw new Error('El archivo CSV de clientes está vacío.');
+            }
+
+            const headers = lines[0].split(',').map(h => h.trim());
+            const expectedHeaders = ['NIT/CC', 'Nombre del Cliente', 'Correo Electronico', 'Valor Cuota', 'Capital Saldo', 'Contraseña'];
+
+            // Validar que los encabezados coincidan
+            if (headers.length !== expectedHeaders.length || !expectedHeaders.every(h => headers.includes(h))) {
+                throw new Error('El archivo CSV de clientes no tiene el formato de encabezados esperado. Asegúrate de que contenga: NIT/CC, Nombre del Cliente, Correo Electronico, Valor Cuota, Capital Saldo, Contraseña.');
+            }
+
+            const newClients = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.trim());
+                if (values.length !== headers.length) {
+                    console.warn(`Saltando fila ${i + 1} del CSV de clientes debido a un número incorrecto de columnas.`);
+                    continue; // Saltar filas con formato incorrecto
+                }
+
+                const clientData = {};
+                headers.forEach((header, index) => {
+                    clientData[header] = values[index];
+                });
+
+                const quotaValue = parseFloat(clientData['Valor Cuota']);
+                const capitalBalance = parseFloat(clientData['Capital Saldo']);
+
+                if (isNaN(quotaValue) || isNaN(capitalBalance)) {
+                    console.warn(`Saltando fila ${i + 1} del CSV de clientes debido a valores numéricos inválidos en Cuota o Saldo.`);
+                    continue;
+                }
+
+                newClients.push({
+                    nitcc: clientData['NIT/CC'],
+                    name: clientData['Nombre del Cliente'],
+                    email: clientData['Correo Electronico'],
+                    quotaValue: quotaValue,
+                    capitalBalance: capitalBalance,
+                    totalDebt: capitalBalance, // Updated: totalDebt is now capitalBalance
+                    paidAmount: 0, // Los clientes nuevos inician con 0 pagado
+                    password: clientData['Contraseña'], // La contraseña del CSV
+                    payments: [] // Inicializar el array de pagos para nuevos clientes
+                });
+            }
+            return newClients;
+        }
+
+        // Función para parsear el CSV de PAGOS
+        function parsePaymentsCSV(csvText) {
+            const lines = csvText.split('\n').filter(line => line.trim() !== '');
+            if (lines.length === 0) {
+                throw new Error('El archivo CSV de pagos está vacío.');
+            }
+
+            const headers = lines[0].split(',').map(h => h.trim());
+            const expectedHeaders = ['NIT/CC', 'VALOR', 'FECHA DE PAGO', 'BANCO', 'REFERENCIA'];
+
+            // Validar que los encabezados coincidan
+            if (headers.length !== expectedHeaders.length || !expectedHeaders.every(h => headers.includes(h))) {
+                throw new Error('El archivo CSV de pagos no tiene el formato de encabezados esperado. Asegúrate de que contenga: NIT/CC, VALOR, FECHA DE PAGO, BANCO, REFERENCIA.');
+            }
+
+            const newPayments = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.trim());
+                if (values.length !== headers.length) {
+                    console.warn(`Saltando fila ${i + 1} del CSV de pagos debido a un número incorrecto de columnas.`);
+                    continue; // Saltar filas con formato incorrecto
+                }
+
+                const paymentData = {}; // Initialize paymentData for each row
+                headers.forEach((header, index) => {
+                    paymentData[header] = values[index];
+                });
+
+                const paymentValue = parseFloat(paymentData['VALOR']);
+
+                if (isNaN(paymentValue)) {
+                    console.warn(`Saltando fila ${i + 1} del CSV de pagos debido a un valor numérico inválido en VALOR.`);
+                    continue;
+                }
+
+                newPayments.push({
+                    'NIT/CC': paymentData['NIT/CC'],
+                    VALOR: paymentValue,
+                    'FECHA DE PAGO': paymentData['FECHA DE PAGO'],
+                    BANCO: paymentData['BANCO'],
+                    REFERENCIA: paymentData['REFERENCIA']
+                });
+            }
+            return newPayments;
+        }
+
+        // Función para obtener el último día del mes actual
+        function getLastDayOfMonth() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = today.getMonth(); // 0-indexed month
+            // Para obtener el último día del mes, creamos una fecha para el primer día del *siguiente* mes
+            // y luego restamos un día.
+            const lastDay = new Date(year, month + 1, 0);
+            return lastDay.toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
+        }
+
+
+        // =========================================================
+        // LÓGICA DE INICIO DE SESIÓN
+        // =========================================================
+
+        // Base de datos simulada de clientes (simulando un archivo de Excel)
+        // Se añade la columna 'password' para el login del cliente y 'payments' para el historial
+        const clientDatabase = [
+            { email: "john.doe@example.com", nitcc: "10101010", name: "John Doe", quotaValue: 100000, capitalBalance: 900000, totalDebt: 900000, paidAmount: 200000, password: "10101010", payments: [{id: 'p001', VALOR: 200000, "FECHA DE PAGO": "2024-01-15", BANCO: "Banco A", REFERENCIA: "REF001"}] },
+            { email: "jane.smith@example.com", nitcc: "20202020", name: "Jane Smith", quotaValue: 150000, capitalBalance: 850000, totalDebt: 850000, paidAmount: 0, password: "20202020", payments: [] },
+            { email: "peter.jones@example.com", nitcc: "30303030", name: "Peter Jones", quotaValue: 80000, capitalBalance: 500000, totalDebt: 500000, paidAmount: 80000, password: "30303030", payments: [{id: 'p002', VALOR: 80000, "FECHA DE PAGO": "2024-02-01", BANCO: "Banco B", REFERENCIA: "REF002"}] },
+            // Datos del CSV proporcionado:
+            { email: "LILIANAPARDOCARRILLO@HOTMAIL.COM", nitcc: "901353537", name: "PARDO BIKES S.A.S", quotaValue: 3227989, capitalBalance: 11811192, totalDebt: 11811192, paidAmount: 0, password: "901353537", payments: [] }
+        ];
+
+        // Credenciales de administrador
+        const ADMIN_USER = "HAMOBILE";
+        const ADMIN_PASS = "HAMOBILE2025*";
+
+        // Referencias a elementos del DOM
+        const loginContainer = document.getElementById('login-container');
+        const clientRoleBtn = document.getElementById('client-role-btn');
+        const adminRoleBtn = document.getElementById('admin-role-btn');
+        const clientLoginForm = document.getElementById('client-login-form');
+        const adminLoginForm = document.getElementById('admin-login-form');
+        const clientLogin = document.getElementById('client-login');
+        const adminLogin = document.getElementById('admin-login');
+        const backToRolesBtn1 = document.getElementById('back-to-roles-btn');
+        const backToRolesBtn2 = document.getElementById('back-to-roles-btn2');
+        const clientErrorMessage = document.getElementById('client-error-message');
+        const adminErrorMessage = document.getElementById('admin-error-message');
+        
+        const clientView = document.getElementById('client-view');
+        const adminView = document.getElementById('admin-view');
+
+        const logoutClientBtn = document.getElementById('logout-client-btn');
+        const logoutAdminBtn = document.getElementById('logout-admin-btn');
+
+        let currentClient = null; // Variable para almacenar el cliente autenticado
+        let nextPaymentId = 100; // Para generar IDs únicos para pagos manuales
+
+        // Función para resetear la vista y volver a la pantalla de selección de rol
+        function resetToLogin() {
+            clientView.classList.add('hidden');
+            adminView.classList.add('hidden');
+            clientLoginForm.classList.add('hidden');
+            adminLoginForm.classList.add('hidden');
+            loginContainer.classList.remove('hidden');
+            document.querySelector('#login-container .grid').classList.remove('hidden');
+            clientLogin.reset(); // Limpiar formularios
+            adminLogin.reset();
+            clientErrorMessage.classList.add('hidden');
+            adminErrorMessage.classList.add('hidden');
+        }
+
+        // Event listener para el botón "Soy Cliente"
+        clientRoleBtn.addEventListener('click', () => {
+            clientLoginForm.classList.remove('hidden');
+            document.querySelector('#login-container .grid').classList.add('hidden');
+        });
+
+        // Event listener para el botón "Soy Administrador"
+        adminRoleBtn.addEventListener('click', () => {
+            adminLoginForm.classList.remove('hidden');
+            document.querySelector('#login-container .grid').classList.add('hidden');
+        });
+
+        // Event listener para los botones "Volver"
+        backToRolesBtn1.addEventListener('click', resetToLogin);
+        backToRolesBtn2.addEventListener('click', resetToLogin);
+
+        // Event listeners para los botones "Cerrar Sesión"
+        logoutClientBtn.addEventListener('click', resetToLogin);
+        logoutAdminBtn.addEventListener('click', resetToLogin);
+
+        // Manejador de login de cliente
+        clientLogin.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const email = document.getElementById('client-email').value;
+            const password = document.getElementById('client-password').value;
+            
+            // Ahora se compara con la columna 'password' del CSV
+            currentClient = clientDatabase.find(client => client.email === email && client.password === password);
+
+            if (currentClient) {
+                // Login exitoso, mostrar la interfaz de cliente
+                loginContainer.classList.add('hidden');
+                clientView.classList.remove('hidden');
+                document.getElementById('client-payment-deadline-display').textContent = getLastDayOfMonth(); // Mostrar la fecha límite para el cliente
+                renderClientStatus(currentClient); // Renderizar la interfaz con los datos del cliente
+                renderPaymentHistory(currentClient); // Renderizar el historial de pagos
+                updateClientProgressBar(currentClient); // Actualizar la barra de progreso dorada
+            } else {
+                // Login fallido
+                clientErrorMessage.textContent = "Lo sentimos, pero tu correo no coincide con la base de datos, por favor contáctese con su vendedor y actualice la información";
+                clientErrorMessage.classList.remove('hidden');
+            }
+        });
+
+        // Manejador de login de administrador
+        adminLogin.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const username = document.getElementById('admin-username').value;
+            const password = document.getElementById('admin-password').value;
+
+            if (username === ADMIN_USER && password === ADMIN_PASS) {
+                // Login exitoso, mostrar la interfaz de administrador
+                loginContainer.classList.add('hidden');
+                adminView.classList.remove('hidden');
+                document.getElementById('payment-deadline-display').textContent = getLastDayOfMonth(); // Mostrar la fecha límite
+                renderClients(); // Renderizar la interfaz del administrador
+                renderAdminPaymentHistory(); // Renderizar el historial de pagos del administrador
+            } else {
+                // Login fallido
+                adminErrorMessage.textContent = "Usuario o contraseña incorrectos.";
+                adminErrorMessage.classList.remove('hidden');
+            }
+        });
+
+
+        // =========================================================
+        // LÓGICA DE LA INTERFAZ DE USUARIO
+        // =========================================================
+
+        const clientStatusContainer = document.getElementById('client-status-container');
+        const paymentHistorySection = document.getElementById('payment-history-section');
+        const paymentHistoryList = document.getElementById('payment-history-list');
+        const showPaymentHistoryBtn = document.getElementById('show-payment-history-btn');
+        const clientMainInfo = document.getElementById('client-main-info');
+
+        const clientProgressBarFill = document.getElementById('client-progress-bar-fill');
+        const clientProgressPercentage = document.getElementById('client-progress-percentage');
+        const goldenMedal = document.getElementById('golden-medal');
+        const discountMessageArea = document.getElementById('discount-message-area');
+
+
+        // Función para renderizar el estado del cliente en la UI
+        function renderClientStatus(client) {
+            clientStatusContainer.innerHTML = '';
+            // Progress is now based on paidAmount vs capitalBalance
+            const progress = client.capitalBalance > 0 ? (client.paidAmount / client.capitalBalance) : 0;
+            const clientCard = document.createElement('div');
+            clientCard.className = 'bg-gray-100 p-4 rounded-lg shadow-md flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0';
+            clientCard.innerHTML = `
+                <div class="flex-grow space-y-1">
+                    <p class="text-lg font-semibold text-gray-800">Hola, ${client.name}!</p>
+                    <p class="text-sm text-gray-600">NIT/CC: ${client.nitcc}</p>
+                    <p class="text-sm text-gray-600">Valor Cuota: $${formatNumber(client.quotaValue)}</p>
+                    <p class="text-sm text-gray-600">Capital Saldo: $${formatNumber(client.capitalBalance)}</p>
+                    <p class="text-sm text-gray-600">Monto Pagado: $${formatNumber(client.paidAmount)}</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-center">
+                        <p class="text-sm font-medium text-gray-600">Avance de Pago:</p>
+                        <canvas id="bike-tire-canvas" width="80" height="80"></canvas>
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <p class="text-xl font-bold text-blue-800">${(progress * 100).toFixed(0)}% Pagado</p>
+                        <button id="pay-btn" class="px-4 py-2 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600 transition duration-300 text-sm">
+                            Simular Pago de Cuota
+                        </button>
+                    </div>
+                </div>
+            `;
+            clientStatusContainer.appendChild(clientCard);
+
+            // Dibuja la llanta después de renderizar el HTML
+            const canvas = document.getElementById('bike-tire-canvas');
+            drawBikeTire(canvas, progress);
+        }
+
+        // Función para renderizar el historial de pagos del cliente
+        function renderPaymentHistory(client) {
+            paymentHistoryList.innerHTML = '';
+            if (client.payments && client.payments.length > 0) {
+                client.payments.forEach(payment => {
+                    const paymentItem = document.createElement('div');
+                    paymentItem.className = 'bg-gray-100 p-3 rounded-lg shadow-sm';
+                    paymentItem.innerHTML = `
+                        <p class="text-md font-semibold text-gray-800">Valor: $${formatNumber(payment.VALOR)}</p>
+                        <p class="text-sm text-gray-600">Fecha: ${payment['FECHA DE PAGO']}</p>
+                        <p class="text-sm text-gray-600">Banco: ${payment.BANCO}</p>
+                        <p class="text-sm text-gray-600">Referencia: ${payment.REFERENCIA}</p>
+                    `;
+                    paymentHistoryList.appendChild(paymentItem);
+                });
+            } else {
+                paymentHistoryList.innerHTML = '<p class="text-gray-500 italic">No hay pagos registrados aún para este cliente.</p>';
+            }
+        }
+        
+        // Función para actualizar la barra de progreso del cliente y la medalla
+        function updateClientProgressBar(client) {
+            // Progress is now based on paidAmount vs capitalBalance
+            const progress = client.capitalBalance > 0 ? (client.paidAmount / client.capitalBalance) : 0;
+            const percentage = (progress * 100).toFixed(0);
+
+            clientProgressBarFill.style.width = `${percentage}%`;
+            clientProgressPercentage.textContent = `${percentage}%`;
+
+            if (percentage === "100") {
+                goldenMedal.classList.remove('hidden');
+            } else {
+                goldenMedal.classList.add('hidden');
+                discountMessageArea.classList.add('hidden'); // Ocultar mensaje si no es 100%
+            }
+        }
+
+        // Event listener para simular pagos del cliente
+        document.addEventListener('click', (event) => {
+            if (event.target.id === 'pay-btn' && currentClient) {
+                // Check if paidAmount is less than capitalBalance for the payment simulation
+                if (currentClient.paidAmount < currentClient.capitalBalance) {
+                    const simulatedPaymentAmount = currentClient.quotaValue; // Simular pago de una cuota
+                    currentClient.paidAmount += simulatedPaymentAmount;
+                    // Ensure paidAmount does not exceed capitalBalance
+                    if (currentClient.paidAmount > currentClient.capitalBalance) {
+                        currentClient.paidAmount = currentClient.capitalBalance;
+                    }
+                    // Añadir el pago simulado al historial (datos de ejemplo)
+                    currentClient.payments.push({
+                        id: 'p' + (nextPaymentId++), // Generar un ID único
+                        VALOR: simulatedPaymentAmount,
+                        "FECHA DE PAGO": new Date().toISOString().slice(0, 10), // Fecha actual
+                        BANCO: "Simulado",
+                        REFERENCIA: "SIMULADO" + Math.floor(Math.random() * 1000)
+                    });
+                    renderClientStatus(currentClient);
+                    renderPaymentHistory(currentClient); // Actualizar historial
+                    updateClientProgressBar(currentClient); // Actualizar la barra de progreso
+                } else {
+                    alert('¡Has completado todos tus pagos!');
+                }
+            }
+        });
+
+        // Event listener para alternar la visibilidad del historial de pagos
+        showPaymentHistoryBtn.addEventListener('click', () => {
+            clientMainInfo.classList.toggle('hidden');
+            paymentHistorySection.classList.toggle('hidden');
+            if (paymentHistorySection.classList.contains('hidden')) {
+                showPaymentHistoryBtn.querySelector('span:first-child').textContent = 'Historial de Pagos';
+                showPaymentHistoryBtn.querySelector('span:last-child').textContent = 'Ver tus movimientos';
+            } else {
+                showPaymentHistoryBtn.querySelector('span:first-child').textContent = 'Ocultar Historial';
+                showPaymentHistoryBtn.querySelector('span:last-child').textContent = 'Ver tus movimientos';
+            }
+        });
+
+        // Event listener para la medalla dorada
+        goldenMedal.addEventListener('click', () => {
+            discountMessageArea.classList.toggle('hidden');
+            // Ocultar el mensaje después de 5 segundos
+            if (!discountMessageArea.classList.contains('hidden')) {
+                setTimeout(() => {
+                    discountMessageArea.classList.add('hidden');
+                }, 5000);
+            }
+        });
+
+
+        // =========================================================
+        // LÓGICA DE LA INTERFAZ DE ADMINISTRADOR
+        // =========================================================
+
+        const clientForm = document.getElementById('client-form');
+        const clientListContainer = document.getElementById('client-list-container');
+        const noClientsMessage = document.getElementById('no-clients-message');
+        const notificationArea = document.getElementById('notification-area');
+        const notificationList = document.getElementById('notification-list');
+        const nitccFilterInput = document.getElementById('nitcc-filter-input');
+        const filterNitccBtn = document.getElementById('filter-nitcc-btn');
+
+        const csvUploadInput = document.getElementById('csv-upload-input');
+        const uploadCsvBtn = document.getElementById('upload-csv-btn');
+        const csvUploadMessage = document.getElementById('csv-upload-message');
+        const downloadTemplateBtn = document.getElementById('download-template-btn');
+
+        const csvPaymentsUploadInput = document.getElementById('csv-payments-upload-input');
+        const uploadPaymentsCsvBtn = document.getElementById('upload-payments-csv-btn');
+        const paymentsCsvUploadMessage = document.getElementById('payments-csv-upload-message');
+        const downloadPaymentsTemplateBtn = document.getElementById('download-payments-template-btn');
+
+        const manualPaymentForm = document.getElementById('manual-payment-form');
+        const manualPaymentMessage = document.getElementById('manual-payment-message');
+        const adminPaymentFilterInput = document.getElementById('admin-payment-filter-input');
+        const adminPaymentFilterBtn = document.getElementById('admin-payment-filter-btn');
+        const adminPaymentHistoryList = document.getElementById('admin-payment-history-list');
+
+
+        // Función para renderizar la lista de clientes en la UI del administrador
+        function renderClients(filterNitcc = '') {
+            clientListContainer.innerHTML = '';
+            const filteredClients = clientDatabase.filter(client => 
+                client.nitcc.includes(filterNitcc)
+            );
+
+            if (filteredClients.length === 0) {
+                noClientsMessage.classList.remove('hidden');
+                clientListContainer.appendChild(noClientsMessage);
+            } else {
+                noClientsMessage.classList.add('hidden');
+                filteredClients.forEach((client, index) => {
+                    // Progress is now based on paidAmount vs capitalBalance
+                    const progress = client.capitalBalance > 0 ? (client.paidAmount / client.capitalBalance) : 0;
+                    const clientCard = document.createElement('div');
+                    clientCard.className = 'bg-gray-100 p-4 rounded-lg shadow flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0';
+                    clientCard.innerHTML = `
+                        <div class="flex-grow space-y-1">
+                            <p class="text-lg font-semibold text-gray-800">${client.name}</p>
+                            <p class="text-sm text-gray-600">NIT/CC: ${client.nitcc}</p>
+                            <p class="text-sm text-gray-600">Email: ${client.email}</p>
+                            <p class="text-sm text-gray-600">Valor Cuota: $${formatNumber(client.quotaValue)}</p>
+                            <p class="text-sm text-gray-600">Capital Saldo: $${formatNumber(client.capitalBalance)}</p>
+                            <p class="text-sm text-gray-600">Monto Pagado: $${formatNumber(client.paidAmount)}</p>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <div class="text-center">
+                                <p class="text-sm font-medium text-gray-600">Avance de Pago:</p>
+                                <canvas class="bike-tire" width="60" height="60" data-progress="${progress}"></canvas>
+                            </div>
+                            <div class="flex flex-col space-y-2">
+                                <p class="text-md font-bold text-gray-800">${(progress * 100).toFixed(0)}% Pagado</p>
+                                <button class="pay-btn px-4 py-2 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600 transition duration-300 text-sm">
+                                    Simular Pago
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    clientListContainer.appendChild(clientCard);
+                });
+                // Dibuja las llantas después de renderizar el HTML
+                document.querySelectorAll('.bike-tire').forEach(canvas => {
+                    const progress = parseFloat(canvas.dataset.progress);
+                    drawBikeTire(canvas, progress);
+                });
+            }
+        }
+        
+        // Event listener para el formulario de agregar cliente (solo en admin)
+        clientForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const nitcc = document.getElementById('client-nitcc').value;
+            const name = document.getElementById('client-name').value;
+            const email = document.getElementById('client-email').value;
+            const quotaValue = parseFloat(document.getElementById('client-quota-value').value);
+            const capitalBalance = parseFloat(document.getElementById('client-balance').value);
+            // Updated: totalDebt is now capitalBalance
+            const totalDebt = capitalBalance; 
+
+            // La contraseña para los clientes agregados manualmente será su NIT/CC por defecto
+            const newClient = { nitcc, name, email, quotaValue, capitalBalance, totalDebt, paidAmount: 0, password: nitcc, payments: [] };
+            clientDatabase.push(newClient);
+            renderClients();
+            clientForm.reset();
+        });
+
+        // Event listener para simular pagos (solo en admin)
+        clientListContainer.addEventListener('click', (event) => {
+            if (event.target.classList.contains('pay-btn')) {
+                const clientCard = event.target.closest('.bg-gray-100');
+                const clientName = clientCard.querySelector('p.text-lg').textContent;
+                const clientIndex = clientDatabase.findIndex(client => client.name === clientName);
+
+                if (clientIndex !== -1) {
+                    // Check if paidAmount is less than capitalBalance for the payment simulation
+                    if (clientDatabase[clientIndex].paidAmount < clientDatabase[clientIndex].capitalBalance) {
+                        const simulatedPaymentAmount = clientDatabase[clientIndex].quotaValue;
+                        clientDatabase[clientIndex].paidAmount += simulatedPaymentAmount;
+                        // Ensure paidAmount does not exceed capitalBalance
+                        if (clientDatabase[clientIndex].paidAmount > clientDatabase[clientIndex].capitalBalance) {
+                            clientDatabase[clientIndex].paidAmount = clientDatabase[clientIndex].capitalBalance;
+                        }
+                        // Añadir el pago simulado al historial del cliente en la base de datos
+                        clientDatabase[clientIndex].payments.push({
+                            id: 'p' + (nextPaymentId++), // Generar un ID único
+                            VALOR: simulatedPaymentAmount,
+                            "FECHA DE PAGO": new Date().toISOString().slice(0, 10),
+                            BANCO: "Simulado Admin",
+                            REFERENCIA: "SIMULADO" + Math.floor(Math.random() * 1000)
+                        });
+
+                        renderClients();
+                        renderAdminPaymentHistory(); // Actualizar historial de pagos del admin
+                    } else {
+                        alert(`¡${clientDatabase[clientIndex].name} ha completado todos sus pagos!`);
+                    }
+                }
+            }
+        });
+
+        // Event listener para el filtro de NIT/CC
+        filterNitccBtn.addEventListener('click', () => {
+            const filterValue = nitccFilterInput.value.trim();
+            renderClients(filterValue);
+        });
+
+        // Event listener para cargar CSV de CLIENTES
+        uploadCsvBtn.addEventListener('click', () => {
+            const file = csvUploadInput.files[0];
+            if (!file) {
+                csvUploadMessage.textContent = 'Por favor, selecciona un archivo CSV.';
+                csvUploadMessage.className = 'mt-4 text-sm text-red-500';
+                csvUploadMessage.classList.remove('hidden');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const text = e.target.result;
+                try {
+                    const newClients = parseClientsCSV(text); // Usar la función específica para clientes
+                    newClients.forEach(client => {
+                        const exists = clientDatabase.some(existingClient => existingClient.nitcc === client.nitcc);
+                        if (!exists) {
+                            clientDatabase.push(client);
+                        } else {
+                            // Opcional: actualizar cliente existente si se desea
+                            console.warn(`Cliente con NIT/CC ${client.nitcc} ya existe. Saltando o actualizando.`);
+                        }
+                    });
+                    renderClients();
+                    csvUploadMessage.textContent = `Se cargaron ${newClients.length} clientes desde el CSV.`;
+                    csvUploadMessage.className = 'mt-4 text-sm text-green-500';
+                    csvUploadMessage.classList.remove('hidden');
+                } catch (error) {
+                    csvUploadMessage.textContent = `Error al procesar el CSV de clientes: ${error.message}`;
+                    csvUploadMessage.className = 'mt-4 text-sm text-red-500';
+                    csvUploadMessage.classList.remove('hidden');
+                }
+            };
+            reader.onerror = () => {
+                csvUploadMessage.textContent = 'Error al leer el archivo.';
+                csvUploadMessage.className = 'mt-4 text-sm text-red-500';
+                csvUploadMessage.classList.remove('hidden');
+            };
+            reader.readAsText(file);
+        });
+
+        // Event listener para descargar plantilla CSV de CLIENTES
+        downloadTemplateBtn.addEventListener('click', () => {
+            const headers = ['NIT/CC', 'Nombre del Cliente', 'Correo Electronico', 'Valor Cuota', 'Capital Saldo', 'Contraseña'];
+            const csvContent = headers.join(',') + '\n'; // Solo los encabezados
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            if (link.download !== undefined) { // Feature detection
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', 'PLANTILLA_CLIENTES.csv');
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        });
+
+        // Event listener para cargar CSV de PAGOS
+        uploadPaymentsCsvBtn.addEventListener('click', () => {
+            const file = csvPaymentsUploadInput.files[0];
+            if (!file) {
+                paymentsCsvUploadMessage.textContent = 'Por favor, selecciona un archivo CSV de pagos.';
+                paymentsCsvUploadMessage.className = 'mt-4 text-sm text-red-500';
+                paymentsCsvUploadMessage.classList.remove('hidden');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const text = e.target.result;
+                try {
+                    const newPayments = parsePaymentsCSV(text); // Usar la función específica para pagos
+                    let paymentsAddedCount = 0;
+                    newPayments.forEach(payment => {
+                        const client = clientDatabase.find(c => c.nitcc === payment['NIT/CC']);
+                        if (client) {
+                            client.payments.push({ ...payment, id: 'p' + (nextPaymentId++) }); // Asignar ID único
+                            client.paidAmount += payment.VALOR; // Sumar el valor del pago al monto pagado
+                            // Ensure paidAmount does not exceed capitalBalance
+                            if (client.paidAmount > client.capitalBalance) {
+                                client.paidAmount = client.capitalBalance;
+                            }
+                            paymentsAddedCount++;
+                        } else {
+                            console.warn(`No se encontró cliente con NIT/CC ${payment['NIT/CC']} para el pago.`, payment);
+                        }
+                    });
+                    renderClients(); // Actualizar la vista de clientes en el admin
+                    renderAdminPaymentHistory(); // Actualizar historial de pagos del admin
+                    paymentsCsvUploadMessage.textContent = `Se cargaron ${paymentsAddedCount} pagos exitosamente.`;
+                    paymentsCsvUploadMessage.className = 'mt-4 text-sm text-green-500';
+                    paymentsCsvUploadMessage.classList.remove('hidden');
+                } catch (error) {
+                    paymentsCsvUploadMessage.textContent = `Error al procesar el CSV de pagos: ${error.message}`;
+                    paymentsCsvUploadMessage.className = 'mt-4 text-sm text-red-500';
+                    paymentsCsvUploadMessage.classList.remove('hidden');
+                }
+            };
+            reader.onerror = () => {
+                paymentsCsvUploadMessage.textContent = 'Error al leer el archivo.';
+                paymentsCsvUploadMessage.className = 'mt-4 text-sm text-red-500';
+                paymentsCsvUploadMessage.classList.remove('hidden');
+            };
+            reader.readAsText(file);
+        });
+
+        // Event listener para descargar plantilla CSV de PAGOS
+        downloadPaymentsTemplateBtn.addEventListener('click', () => {
+            const headers = ['NIT/CC', 'VALOR', 'FECHA DE PAGO', 'BANCO', 'REFERENCIA'];
+            const csvContent = headers.join(',') + '\n'; // Solo los encabezados
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            if (link.download !== undefined) { // Feature detection
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', 'PLANTILLA_PAGOS.csv');
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        });
+
+        // Event listener para agregar pago manualmente
+        manualPaymentForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const nitcc = document.getElementById('payment-nitcc').value;
+            const value = parseFloat(document.getElementById('payment-value').value);
+            const date = document.getElementById('payment-date').value;
+            const bank = document.getElementById('payment-bank').value;
+            const reference = document.getElementById('payment-reference').value;
+
+            const client = clientDatabase.find(c => c.nitcc === nitcc);
+
+            if (!client) {
+                manualPaymentMessage.textContent = 'Error: Cliente no encontrado con el NIT/CC proporcionado.';
+                manualPaymentMessage.className = 'mt-4 text-sm text-red-500';
+                manualPaymentMessage.classList.remove('hidden');
+                return;
+            }
+            if (isNaN(value) || value <= 0) {
+                manualPaymentMessage.textContent = 'Error: El valor del pago debe ser un número positivo.';
+                manualPaymentMessage.className = 'mt-4 text-sm text-red-500';
+                manualPaymentMessage.classList.remove('hidden');
+                return;
+            }
+
+            const newPayment = {
+                id: 'p' + (nextPaymentId++), // Generar un ID único
+                'NIT/CC': nitcc,
+                VALOR: value,
+                'FECHA DE PAGO': date,
+                BANCO: bank,
+                REFERENCIA: reference
+            };
+
+            client.payments.push(newPayment);
+            client.paidAmount += value; // Actualizar el monto pagado del cliente
+
+            // Ensure paidAmount does not exceed capitalBalance
+            if (client.paidAmount > client.capitalBalance) {
+                client.paidAmount = client.capitalBalance;
+            }
+
+            manualPaymentMessage.textContent = `Pago de $${formatNumber(value)} agregado para ${client.name}.`;
+            manualPaymentMessage.className = 'mt-4 text-sm text-green-500';
+            manualPaymentMessage.classList.remove('hidden');
+            manualPaymentForm.reset();
+            renderClients(); // Actualizar la lista de clientes
+            renderAdminPaymentHistory(); // Actualizar el historial de pagos del admin
+        });
+
+        // Función para renderizar el historial de pagos del administrador
+        function renderAdminPaymentHistory(filterValue = '') {
+            adminPaymentHistoryList.innerHTML = '';
+            let allPayments = [];
+
+            // Recopilar todos los pagos de todos los clientes
+            clientDatabase.forEach(client => {
+                client.payments.forEach(payment => {
+                    // Añadir el NIT/CC y nombre del cliente al objeto de pago para facilitar el filtrado y visualización
+                    allPayments.push({ ...payment, clientNitcc: client.nitcc, clientName: client.name });
+                });
+            });
+
+            // Filtrar los pagos
+            const filteredPayments = allPayments.filter(payment => 
+                payment.clientNitcc.includes(filterValue) || 
+                payment.REFERENCIA.toLowerCase().includes(filterValue.toLowerCase()) ||
+                payment.BANCO.toLowerCase().includes(filterValue.toLowerCase()) ||
+                payment['FECHA DE PAGO'].includes(filterValue) ||
+                payment.clientName.toLowerCase().includes(filterValue.toLowerCase())
+            );
+
+            if (filteredPayments.length === 0) {
+                adminPaymentHistoryList.innerHTML = '<p class="text-gray-500 italic">No hay pagos registrados o no coinciden con el filtro.</p>';
+            } else {
+                filteredPayments.forEach(payment => {
+                    const paymentItem = document.createElement('div');
+                    paymentItem.className = 'bg-gray-100 p-3 rounded-lg shadow-sm flex justify-between items-center';
+                    paymentItem.innerHTML = `
+                        <div>
+                            <p class="text-md font-semibold text-gray-800">Cliente: ${payment.clientName} (NIT/CC: ${payment.clientNitcc})</p>
+                            <p class="text-sm text-gray-600">Valor: $${formatNumber(payment.VALOR)}</p>
+                            <p class="text-sm text-gray-600">Fecha: ${payment['FECHA DE PAGO']}</p>
+                            <p class="text-sm text-gray-600">Banco: ${payment.BANCO}</p>
+                            <p class="text-sm text-gray-600">Referencia: ${payment.REFERENCIA}</p>
+                        </div>
+                        <button class="delete-payment-btn px-4 py-2 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 transition duration-300 text-sm" 
+                                data-client-nitcc="${payment.clientNitcc}" data-payment-id="${payment.id}">
+                            Eliminar
+                        </button>
+                    `;
+                    adminPaymentHistoryList.appendChild(paymentItem);
+                });
+            }
+        }
+
+        // Event listener para el filtro de pagos del administrador
+        adminPaymentFilterBtn.addEventListener('click', () => {
+            const filterValue = adminPaymentFilterInput.value.trim();
+            renderAdminPaymentHistory(filterValue);
+        });
+
+        // Event listener para eliminar pagos desde el historial del administrador
+        adminPaymentHistoryList.addEventListener('click', (event) => {
+            if (event.target.classList.contains('delete-payment-btn')) {
+                const clientNitcc = event.target.dataset.clientNitcc;
+                const paymentId = event.target.dataset.paymentId;
+
+                const client = clientDatabase.find(c => c.nitcc === clientNitcc);
+                if (client) {
+                    const paymentIndex = client.payments.findIndex(p => p.id === paymentId);
+                    if (paymentIndex !== -1) {
+                        const deletedPayment = client.payments.splice(paymentIndex, 1)[0];
+                        client.paidAmount -= deletedPayment.VALOR; // Restar el valor del pago eliminado
+                        if (client.paidAmount < 0) client.paidAmount = 0; // Asegurarse de que no sea negativo
+
+                        renderClients(); // Actualizar la vista de clientes
+                        renderAdminPaymentHistory(adminPaymentFilterInput.value.trim()); // Re-renderizar historial con filtro actual
+                        alert(`Pago con referencia ${deletedPayment.REFERENCIA} eliminado para ${client.name}.`);
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
